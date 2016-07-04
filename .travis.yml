@@ -5,3 +5,7 @@ install:
 before_script:
   - ./bin/build
 script: node build/test.js
+cache:
+  directories:
+    - elm-stuff
+    - node_modules
