@@ -1,4 +1,5 @@
-= Game of life in Elm
+h2. Game of life in Elm
+
 https://travis-ci.org/adz/elm-game-of-life.svg?branch=maste://travis-ci.org/adz/elm-game-of-life.svg?branch=master
 
 Just a learning exercise...
