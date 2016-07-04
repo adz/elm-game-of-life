@@ -27,7 +27,7 @@ fromSpec spec =
         charToCell =
             (==) '*'
     in
-        Array.fromList (List.map rowStringToRow (String.lines spec))
+        Array.fromList <| List.map rowStringToRow <| String.lines spec
 
 
 toSpec : Board -> String
@@ -42,4 +42,4 @@ toSpec board =
             else
                 "."
     in
-        String.join "\n" (List.map rowArrayToString (Array.toList board))
+        String.join "\n" <| List.map rowArrayToString <| Array.toList board
