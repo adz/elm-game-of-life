@@ -5,6 +5,7 @@ import Html.App as App
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Time exposing (Time, second)
+import Board exposing (Board)
 
 
 main =
@@ -21,12 +22,12 @@ main =
 
 
 type alias Model =
-    Time
+    Board
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( 0, Cmd.none )
+    ( Board.makeEmpty 10 10, Cmd.none )
 
 
 
@@ -38,10 +39,10 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg board =
     case msg of
         Tick newTime ->
-            ( newTime, Cmd.none )
+            ( Board.vivify 1 1 board, Cmd.none )
 
 
 
@@ -57,21 +58,28 @@ subscriptions model =
 -- VIEW
 
 
-makeSquare tx ty =
-    rect [ x (toString (tx * 60)), y (toString (ty * 60)), width "60", height "60", rx "5", ry "5" ] []
+makeSquare tx ty status =
+    let
+        colour =
+            if status then
+                "#FFFFFF"
+            else
+                "#000000"
+    in
+        rect [ x (toString (tx * 60)), y (toString (ty * 60)), width "60", height "60", rx "5", ry "5", fill colour ] []
 
 
 view : Model -> Html Msg
-view model =
+view board =
     let
-        angle =
-            turns (Time.inMinutes model)
+        flattenedBoard =
+            Board.flatten board
 
-        handX =
-            toString (50 + 40 * cos angle)
-
-        handY =
-            toString (50 + 40 * sin angle)
+        toSquare ( col, row, status ) =
+            makeSquare col row status
     in
         svg [ viewBox "0 0 1000 1000", width "1000px" ]
-            (List.concatMap (\x -> List.map (\y -> makeSquare x y) [0..9]) [0..9])
+            (List.map
+                toSquare
+                flattenedBoard
+            )

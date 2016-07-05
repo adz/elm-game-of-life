@@ -12,6 +12,67 @@ type alias Board =
     Array.Array (Array.Array Bool)
 
 
+asList : Board -> List (List Bool)
+asList =
+    List.map Array.toList << Array.toList
+
+
+flatten : Board -> List ( Int, Int, Bool )
+flatten board =
+    let
+        rowToTuple rowIndex row =
+            List.indexedMap (\colIndex cell -> ( colIndex, rowIndex, cell )) row
+
+        boardTuplified =
+            List.indexedMap rowToTuple (asList board)
+    in
+        List.concatMap identity boardTuplified
+
+
+neighbours : Int -> Int -> Board
+neighbours col row board =
+    [ get (col - 1) row board
+    , get (col - 1) (row - 1) board
+    , get col (row - 1) board
+    , get (col + 1) row board
+    , get (col + 1) (row + 1) board
+    , get col (row + 1) board
+    ]
+
+
+nextGen : Board -> Board
+nextGen board =
+    let
+        shouldKill colIndex rowIndex =
+            case neighbours colIndex rowIndex board of
+                2 ->
+                    True
+
+                3 ->
+                    True
+
+                _ ->
+                    False
+
+        reproduce colIndex rowIndex =
+            if neighbours colIndex rowIndex board == 6 then
+                True
+            else
+                False
+
+        mapRow rowIndex row =
+            Array.indexedMap
+                (\colIndex cell ->
+                    if cell && shouldKill then
+                        Board.kill
+                    else
+                        boar
+                )
+                row
+    in
+        Array.indexedMap mapRow board
+
+
 {-| Get a cell at position colNum / rowNum
 -}
 get : Int -> Int -> Board -> Bool

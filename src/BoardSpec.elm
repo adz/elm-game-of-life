@@ -19,7 +19,7 @@ trimSpec =
 
 
 fromSpec : String -> Board
-fromSpec spec =
+fromSpec =
     let
         rowStringToRow =
             String.toList >> List.map charToCell >> Array.fromList
@@ -27,7 +27,7 @@ fromSpec spec =
         charToCell =
             (==) '*'
     in
-        Array.fromList <| List.map rowStringToRow <| String.lines spec
+        Array.fromList << List.map rowStringToRow << String.lines
 
 
 toSpec : Board -> String

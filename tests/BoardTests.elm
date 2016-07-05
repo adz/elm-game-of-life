@@ -34,6 +34,7 @@ tests =
         , testToSpecFilled
         , testKill
         , testVivify
+        , testFlatten
         ]
 
 
@@ -94,6 +95,18 @@ testVivify =
 
 testToSpec =
     empty2By3 `equals` (toSpec (Board.makeEmpty 2 3))
+
+
+testFlatten =
+    (Board.flatten <| Board.makeEmpty 2 3)
+        `equals`
+            [ ( 0, 0, False )
+            , ( 1, 0, False )
+            , ( 0, 1, False )
+            , ( 1, 1, False )
+            , ( 0, 2, False )
+            , ( 1, 2, False )
+            ]
 
 
 testToSpecFilled =
