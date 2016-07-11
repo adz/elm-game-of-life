@@ -5,8 +5,20 @@ import String
 import List
 
 
-{-| A board is an array of arrays containing booleans. If a cell is alive,
-then the boolean is True
+-- Game of life rules:
+-- --------------------------------
+-- if alive:
+--   0,1 => die (under populated)
+--   2,3 => live
+--   _   => die (overpopulated)
+--
+-- if dead:
+--   3 => come back to live
+--   _ => stay dead
+
+
+{-| A board is an array of arrays containing booleans.
+  | If a cell is alive, then the boolean is True
 -}
 type alias Board =
     Array.Array (Array.Array Bool)
