@@ -1,8 +1,9 @@
 module Main exposing (..)
 
-import Html exposing (Html)
+import Html exposing (Html, div, h1, text, img)
+import Html.Attributes
 import Html.App as App
-import Svg exposing (..)
+import Svg exposing (svg, rect)
 import Svg.Attributes exposing (..)
 import Time exposing (Time, second, millisecond)
 import Board exposing (Board)
@@ -90,10 +91,10 @@ subscriptions model =
 makeSquare tx ty status =
     let
         widthMultiplier =
-            60
+            50
 
         heightMultiplier =
-            60
+            50
 
         colour =
             if status then
@@ -106,8 +107,8 @@ makeSquare tx ty status =
             , y (toString (ty * heightMultiplier))
             , width (toString widthMultiplier)
             , height (toString heightMultiplier)
-            , rx "10"
-            , ry "10"
+            , rx "5"
+            , ry "5"
             , fill colour
             ]
             []
@@ -122,8 +123,29 @@ view board =
         toSquare ( col, row, status ) =
             makeSquare col row status
     in
-        svg [ viewBox "0 0 1000 1000", width "1000px" ]
-            (List.map
-                toSquare
-                flattenedBoard
-            )
+        div
+            [ Html.Attributes.style
+                [ ( "margin-left", "2em" )
+                ]
+            ]
+            [ h1 []
+                [ text
+                    "Game of life in elm"
+                ]
+            , img
+                [ Html.Attributes.src "tree.png"
+                , Html.Attributes.style
+                    [ ( "position", "absolute" )
+                    , ( "right", "0" )
+                    , ( "top", "0" )
+                    , ( "opacity", "0.1" )
+                    ]
+                ]
+                []
+            , svg
+                [ viewBox "0 0 1000 1000", width "1000px" ]
+                (List.map
+                    toSquare
+                    flattenedBoard
+                )
+            ]
