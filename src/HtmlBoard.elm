@@ -80,7 +80,7 @@ update msg board =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Time.every (5 * second) Tick
+    Time.every (500 * millisecond) Tick
 
 
 
