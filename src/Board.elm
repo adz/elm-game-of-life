@@ -24,11 +24,15 @@ type alias Board =
     Array.Array (Array.Array Bool)
 
 
+{-| Convert array of arrays to list of lists
+-}
 asList : Board -> List (List Bool)
 asList =
     List.map Array.toList << Array.toList
 
 
+{-| Flatten board to list of tuples containing col, row and cell
+-}
 flatten : Board -> List ( Int, Int, Bool )
 flatten board =
     let
@@ -41,48 +45,62 @@ flatten board =
         List.concatMap identity boardTuplified
 
 
-neighbours : Int -> Int -> Board
+{-| Calculate number of neighbours alive
+-}
+neighbours : Int -> Int -> Board -> Int
 neighbours col row board =
-    [ get (col - 1) row board
-    , get (col - 1) (row - 1) board
-    , get col (row - 1) board
-    , get (col + 1) row board
-    , get (col + 1) (row + 1) board
-    , get col (row + 1) board
-    ]
+    let
+        neighbourCells =
+            [ get (col - 1) row board
+            , get (col - 1) (row - 1) board
+            , get col (row - 1) board
+            , get (col + 1) (row - 1) board
+            , get (col + 1) row board
+            , get (col + 1) (row + 1) board
+            , get col (row + 1) board
+            , get (col - 1) (row + 1) board
+            ]
+
+        valueOf cell =
+            if cell then
+                1
+            else
+                0
+    in
+        List.sum <| List.map valueOf neighbourCells
 
 
+{-| Produce a next generation board
+-}
 nextGen : Board -> Board
 nextGen board =
     let
         shouldKill colIndex rowIndex =
-            case neighbours colIndex rowIndex board of
-                2 ->
-                    True
+            not <| List.member (neighbours colIndex rowIndex board) [ 2, 3 ]
 
-                3 ->
-                    True
+        shouldReproduce colIndex rowIndex =
+            (neighbours colIndex rowIndex board) == 3
 
-                _ ->
-                    False
-
-        reproduce colIndex rowIndex =
-            if neighbours colIndex rowIndex board == 6 then
-                True
+        visitCell cell colIndex rowIndex newBoard =
+            if cell && shouldKill colIndex rowIndex then
+                kill colIndex rowIndex newBoard
+            else if not cell && shouldReproduce colIndex rowIndex then
+                vivify colIndex rowIndex newBoard
             else
-                False
+                newBoard
 
-        mapRow rowIndex row =
-            Array.indexedMap
-                (\colIndex cell ->
-                    if cell && shouldKill then
-                        Board.kill
-                    else
-                        boar
-                )
-                row
+        foldRow rowIndex row newBoard =
+            snd <|
+                Array.foldl
+                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell colIndex rowIndex newBoard2 ))
+                    ( 0, newBoard )
+                    row
     in
-        Array.indexedMap mapRow board
+        snd <|
+            Array.foldl
+                (\row ( rowIndex, newBoard ) -> ( rowIndex + 1, foldRow rowIndex row newBoard ))
+                ( 0, board )
+                board
 
 
 {-| Get a cell at position colNum / rowNum
@@ -102,6 +120,8 @@ get colNum rowNum board =
         Maybe.withDefault False getCell
 
 
+{-| Put a cell at position colNum / rowNum
+-}
 put : Int -> Int -> Board -> Bool -> Board
 put colNum rowNum board status =
     let
@@ -110,20 +130,29 @@ put colNum rowNum board status =
 
         makeNewRow =
             Maybe.map newRow (Array.get rowNum board)
+
+        maybeMakeNewRow =
+            (Maybe.withDefault (Array.fromList []) makeNewRow)
     in
-        Array.set rowNum (Maybe.withDefault (Array.fromList []) makeNewRow) board
+        Array.set rowNum maybeMakeNewRow board
 
 
+{-| Kill cell at position col, row
+-}
 kill : Int -> Int -> Board -> Board
 kill colNum rowNum board =
     put colNum rowNum board False
 
 
+{-| Vivify (bring to life) cell at position col, row
+-}
 vivify : Int -> Int -> Board -> Board
 vivify colNum rowNum board =
     put colNum rowNum board True
 
 
+{-| Make a new board of size cols/rows
+-}
 makeEmpty : Int -> Int -> Board
 makeEmpty cols rows =
     Array.repeat rows (Array.repeat cols False)

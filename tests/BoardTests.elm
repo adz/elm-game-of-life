@@ -35,6 +35,10 @@ tests =
         , testKill
         , testVivify
         , testFlatten
+        , testGen
+        , testGenRows
+        , testGenRowsBroked
+          -- , testGenGlider
         ]
 
 
@@ -111,3 +115,34 @@ testFlatten =
 
 testToSpecFilled =
     (toSpec <| fromSpec filled2By3) `equals` filled2By3
+
+
+testGen =
+    (Board.nextGen <| fromSpec "***") `equals` (fromSpec ".*.")
+
+
+testGenRows =
+    (toSpec <| (Board.nextGen <| fromSpec ".*\n**")) `equals` (toSpec <| (fromSpec "**\n**"))
+
+
+testGenRowsBroked =
+    (toSpec <| (Board.nextGen <| fromSpec "*\n.")) `equals` (toSpec <| (fromSpec ".\n."))
+
+
+testGenGlider =
+    let
+        glider =
+            fromSpec <| trimSpec """
+       .*...
+       ..*..
+       ***..
+       ....."""
+
+        gliderNext =
+            fromSpec <| trimSpec """
+       .....
+       .**..
+       .**..
+       .*..."""
+    in
+        (toSpec <| Board.nextGen glider) `equals` (toSpec gliderNext)
