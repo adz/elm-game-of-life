@@ -89,13 +89,28 @@ subscriptions model =
 
 makeSquare tx ty status =
     let
+        widthMultiplier =
+            60
+
+        heightMultiplier =
+            60
+
         colour =
             if status then
-                "#FFFFFF"
+                "#00000F"
             else
-                "#000000"
+                "#EEEEEE"
     in
-        rect [ x (toString (tx * 60)), y (toString (ty * 60)), width "60", height "60", rx "5", ry "5", fill colour ] []
+        rect
+            [ x (toString (tx * widthMultiplier))
+            , y (toString (ty * heightMultiplier))
+            , width (toString widthMultiplier)
+            , height (toString heightMultiplier)
+            , rx "10"
+            , ry "10"
+            , fill colour
+            ]
+            []
 
 
 view : Model -> Html Msg
