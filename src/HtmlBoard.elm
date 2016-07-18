@@ -29,7 +29,10 @@ main =
 
 
 type alias Model =
-    ( Board, Int )
+    { board : Board
+    , speed : Int
+    , paused : Bool
+    }
 
 
 {-| This is available as shmookey/cmd-extra but inline here to comprehend
@@ -45,7 +48,7 @@ message x =
 
 init : ( Model, Cmd Msg )
 init =
-    ( ( Board.makeEmpty 10 10, 500 ), message GenerateRandomBoard )
+    ( { board = Board.makeEmpty 10 10, speed = 500, paused = False }, message GenerateRandomBoard )
 
 
 type Msg
@@ -57,40 +60,33 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ( board, speed ) =
+update msg model =
     let
         randomBoardGenerator =
             Random.map Board.fromList (Random.list 10 (Random.list 10 Random.bool))
     in
         case msg of
             Pause ->
-                ( ( board
-                  , if speed > 0 then
-                        0
-                    else
-                        500
-                  )
-                , Cmd.none
-                )
+                ( { model | paused = not model.paused }, Cmd.none )
 
             SpeedDelta delta ->
-                ( ( board, speed + delta ), Cmd.none )
+                ( { model | speed = model.speed + delta }, Cmd.none )
 
             Tick newTime ->
                 let
                     newBoard =
-                        if speed > 0 then
-                            Board.nextGen board
+                        if model.paused then
+                            model.board
                         else
-                            board
+                            Board.nextGen model.board
                 in
-                    ( ( newBoard, speed ), Cmd.none )
+                    ( { model | board = newBoard }, Cmd.none )
 
             GenerateRandomBoard ->
-                ( ( board, speed ), Random.generate NewBoard randomBoardGenerator )
+                ( model, Random.generate NewBoard randomBoardGenerator )
 
-            NewBoard board ->
-                ( ( board, speed ), Cmd.none )
+            NewBoard newBoard ->
+                ( { model | board = newBoard }, Cmd.none )
 
 
 
@@ -98,7 +94,7 @@ update msg ( board, speed ) =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions ( board, speed ) =
+subscriptions { speed } =
     Time.every (toFloat speed * millisecond) Tick
 
 
@@ -133,7 +129,7 @@ makeSquare tx ty status =
 
 
 view : Model -> Html Msg
-view ( board, speed ) =
+view { board, speed, paused } =
     let
         flattenedBoard =
             Board.flatten board
@@ -169,7 +165,12 @@ view ( board, speed ) =
             , div []
                 [ button [ onClick Pause ] [ text "Pause" ]
                 , button [ onClick (SpeedDelta (-50)) ] [ text "-" ]
-                , text <| toString speed
+                , text <|
+                    (if paused then
+                        "Paused"
+                     else
+                        toString speed
+                    )
                 , button [ onClick (SpeedDelta 50) ] [ text "+" ]
                 , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
                 ]
