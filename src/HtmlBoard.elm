@@ -137,26 +137,8 @@ view { board, speed, paused } =
         toSquare ( col, row, status ) =
             makeSquare col row status
     in
-        div
-            [ Html.Attributes.style
-                [ ( "margin-left", "2em" )
-                ]
-            ]
-            [ h1 []
-                [ text
-                    "Game of life in elm"
-                ]
-            , img
-                [ Html.Attributes.src "tree.png"
-                , Html.Attributes.style
-                    [ ( "position", "absolute" )
-                    , ( "right", "0" )
-                    , ( "top", "0" )
-                    , ( "opacity", "0.1" )
-                    ]
-                ]
-                []
-            , svg
+        div []
+            [ svg
                 [ viewBox "0 0 500 500", width "500px" ]
                 (List.map
                     toSquare

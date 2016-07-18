@@ -1,2 +1,3 @@
 #!/bin/bash
-./bin/build && node build/test
+elm-make --yes --output build/test.js tests/TestRunner.elm
+node build/test

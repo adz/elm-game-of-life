@@ -4,3 +4,4 @@ elm-stuff/
 repl-temp-*
 *.log
 /build
+/dist
