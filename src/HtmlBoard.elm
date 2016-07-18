@@ -138,7 +138,7 @@ view board =
                 ]
                 []
             , svg
-                [ viewBox "0 0 1000 1000", width "1000px" ]
+                [ viewBox "0 0 500 500", width "500px" ]
                 (List.map
                     toSquare
                     flattenedBoard
