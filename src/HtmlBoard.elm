@@ -8,6 +8,10 @@ import Svg.Attributes exposing (..)
 import Time exposing (Time, second, millisecond)
 import Board exposing (Board)
 import BoardSpec exposing (fromSpec, trimSpec)
+import Arrangements exposing (stabalisingToRepeating)
+import Random
+import Array
+import Task
 
 
 main =
@@ -27,20 +31,43 @@ type alias Model =
     Board
 
 
+{-| This is available as shmookey/cmd-extra but inline here to comprehend
+-}
+message : msg -> Cmd msg
+message x =
+    Task.perform identity identity (Task.succeed x)
+
+
+
+-- UPDATE
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( Board.makeEmpty 10 10, Cmd.none )
+    ( Board.makeEmpty 10 10, message GenerateRandomBoard )
 
 
 type Msg
     = Tick Time
+    | GenerateRandomBoard
+    | NewBoard Board
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg board =
-    case msg of
-        Tick newTime ->
-            ( Board.nextGen board, Cmd.none )
+    let
+        randomBoardGenerator =
+            Random.map Board.fromList (Random.list 10 (Random.list 10 Random.bool))
+    in
+        case msg of
+            Tick newTime ->
+                ( Board.nextGen board, Cmd.none )
+
+            GenerateRandomBoard ->
+                ( board, Random.generate NewBoard randomBoardGenerator )
+
+            NewBoard board ->
+                ( board, Cmd.none )
 
 
 

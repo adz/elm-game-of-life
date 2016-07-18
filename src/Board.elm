@@ -31,6 +31,11 @@ asList =
     List.map Array.toList << Array.toList
 
 
+fromList : List (List Bool) -> Board
+fromList =
+    (List.map Array.fromList) >> Array.fromList
+
+
 {-| Flatten board to list of tuples containing col, row and cell
 -}
 flatten : Board -> List ( Int, Int, Bool )
