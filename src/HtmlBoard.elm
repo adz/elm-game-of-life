@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, text, img, button)
+import Html exposing (Html, div, span, h1, text, img, button)
 import Html.Events exposing (onClick)
 import Html.Attributes
 import Html.App as App
@@ -13,6 +13,20 @@ import Arrangements exposing (stabalisingToRepeating)
 import Random
 import Array
 import Task
+import String
+
+
+config =
+    { rows = 50
+    , cols = 60
+    , boardWidth = 500
+    , boardHeight = 600
+    , cellRounding = 8
+    , deadColour = "#00000F"
+    , aliveColour = "#EEEEEE"
+    , speedDelta = 50
+    , defaultSpeed = 500
+    }
 
 
 main =
@@ -48,12 +62,18 @@ message x =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { board = Board.makeEmpty 10 10, speed = 500, paused = False }, message GenerateRandomBoard )
+    ( { board = Board.makeEmpty config.cols config.rows
+      , speed = config.defaultSpeed
+      , paused = False
+      }
+    , message GenerateRandomBoard
+    )
 
 
 type Msg
     = Tick Time
     | Pause
+    | Step
     | GenerateRandomBoard
     | SpeedDelta Int
     | NewBoard Board
@@ -63,7 +83,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         randomBoardGenerator =
-            Random.map Board.fromList (Random.list 10 (Random.list 10 Random.bool))
+            Random.list config.cols Random.bool
+                |> Random.list config.rows
+                |> Random.map Board.fromList
     in
         case msg of
             Pause ->
@@ -74,13 +96,16 @@ update msg model =
 
             Tick newTime ->
                 let
-                    newBoard =
+                    cmd =
                         if model.paused then
-                            model.board
+                            Cmd.none
                         else
-                            Board.nextGen model.board
+                            message Step
                 in
-                    ( { model | board = newBoard }, Cmd.none )
+                    ( model, cmd )
+
+            Step ->
+                ( { model | board = Board.nextGen model.board }, Cmd.none )
 
             GenerateRandomBoard ->
                 ( model, Random.generate NewBoard randomBoardGenerator )
@@ -104,25 +129,25 @@ subscriptions { speed } =
 
 makeSquare tx ty status =
     let
-        widthMultiplier =
-            50
+        cellWidth =
+            config.boardWidth // config.cols
 
-        heightMultiplier =
-            50
+        cellHeight =
+            config.boardHeight // config.rows
 
         colour =
             if status then
-                "#00000F"
+                config.deadColour
             else
-                "#EEEEEE"
+                config.aliveColour
     in
         rect
-            [ x (toString (tx * widthMultiplier))
-            , y (toString (ty * heightMultiplier))
-            , width (toString widthMultiplier)
-            , height (toString heightMultiplier)
-            , rx "5"
-            , ry "5"
+            [ x <| toString <| tx * cellWidth
+            , y <| toString <| ty * cellHeight
+            , width <| toString cellWidth
+            , height <| toString cellHeight
+            , rx <| toString config.cellRounding
+            , ry <| toString config.cellRounding
             , fill colour
             ]
             []
@@ -136,24 +161,42 @@ view { board, speed, paused } =
 
         toSquare ( col, row, status ) =
             makeSquare col row status
+
+        viewPort =
+            [ 0
+            , 0
+            , config.boardWidth
+            , config.boardHeight
+            ]
     in
         div []
             [ svg
-                [ viewBox "0 0 500 500", width "500px" ]
+                [ viewBox <| String.join " " (List.map toString viewPort)
+                , width <| (toString config.boardWidth) ++ "px"
+                , height <| (toString config.boardHeight) ++ "px"
+                ]
                 (List.map
                     toSquare
                     flattenedBoard
                 )
             , div []
-                [ button [ onClick Pause ] [ text "Pause" ]
-                , button [ onClick (SpeedDelta (-50)) ] [ text "-" ]
+                [ if paused then
+                    span []
+                        [ button [ onClick Pause ] [ text "Play" ]
+                        , button [ onClick Step ] [ text "Step" ]
+                        ]
+                  else
+                    button [ onClick Pause ] [ text "Pause" ]
+                , button [ onClick (SpeedDelta (-config.speedDelta)) ] [ text "-" ]
                 , text <|
                     (if paused then
                         "Paused"
                      else
                         toString speed
                     )
-                , button [ onClick (SpeedDelta 50) ] [ text "+" ]
+                , text <| " height " ++ (toString <| config.boardHeight // config.rows)
+                , text <| " width " ++ (toString <| config.boardWidth // config.cols)
+                , button [ onClick (SpeedDelta config.speedDelta) ] [ text "+" ]
                 , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
                 ]
             ]
