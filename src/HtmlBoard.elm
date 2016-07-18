@@ -1,6 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, text, img)
+import Html exposing (Html, div, h1, text, img, button)
+import Html.Events exposing (onClick)
 import Html.Attributes
 import Html.App as App
 import Svg exposing (svg, rect)
@@ -28,7 +29,7 @@ main =
 
 
 type alias Model =
-    Board
+    ( Board, Int )
 
 
 {-| This is available as shmookey/cmd-extra but inline here to comprehend
@@ -44,30 +45,52 @@ message x =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Board.makeEmpty 10 10, message GenerateRandomBoard )
+    ( ( Board.makeEmpty 10 10, 500 ), message GenerateRandomBoard )
 
 
 type Msg
     = Tick Time
+    | Pause
     | GenerateRandomBoard
+    | SpeedDelta Int
     | NewBoard Board
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg board =
+update msg ( board, speed ) =
     let
         randomBoardGenerator =
             Random.map Board.fromList (Random.list 10 (Random.list 10 Random.bool))
     in
         case msg of
+            Pause ->
+                ( ( board
+                  , if speed > 0 then
+                        0
+                    else
+                        500
+                  )
+                , Cmd.none
+                )
+
+            SpeedDelta delta ->
+                ( ( board, speed + delta ), Cmd.none )
+
             Tick newTime ->
-                ( Board.nextGen board, Cmd.none )
+                let
+                    newBoard =
+                        if speed > 0 then
+                            Board.nextGen board
+                        else
+                            board
+                in
+                    ( ( newBoard, speed ), Cmd.none )
 
             GenerateRandomBoard ->
-                ( board, Random.generate NewBoard randomBoardGenerator )
+                ( ( board, speed ), Random.generate NewBoard randomBoardGenerator )
 
             NewBoard board ->
-                ( board, Cmd.none )
+                ( ( board, speed ), Cmd.none )
 
 
 
@@ -75,8 +98,8 @@ update msg board =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    Time.every (500 * millisecond) Tick
+subscriptions ( board, speed ) =
+    Time.every (toFloat speed * millisecond) Tick
 
 
 
@@ -110,7 +133,7 @@ makeSquare tx ty status =
 
 
 view : Model -> Html Msg
-view board =
+view ( board, speed ) =
     let
         flattenedBoard =
             Board.flatten board
@@ -143,4 +166,11 @@ view board =
                     toSquare
                     flattenedBoard
                 )
+            , div []
+                [ button [ onClick Pause ] [ text "Pause" ]
+                , button [ onClick (SpeedDelta (-50)) ] [ text "-" ]
+                , text <| toString speed
+                , button [ onClick (SpeedDelta 50) ] [ text "+" ]
+                , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
+                ]
             ]
