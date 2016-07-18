@@ -17,13 +17,13 @@ import String
 
 
 config =
-    { rows = 50
-    , cols = 60
-    , boardWidth = 500
+    { rows = 60
+    , cols = 80
+    , boardWidth = 800
     , boardHeight = 600
-    , cellRounding = 8
-    , deadColour = "#00000F"
-    , aliveColour = "#EEEEEE"
+    , cellRounding = 3
+    , deadColour = "#EEEEEE"
+    , aliveColour = "rgba(71,161,77,0.6)"
     , speedDelta = 50
     , defaultSpeed = 500
     }
@@ -137,9 +137,9 @@ makeSquare tx ty status =
 
         colour =
             if status then
-                config.deadColour
-            else
                 config.aliveColour
+            else
+                config.deadColour
     in
         rect
             [ x <| toString <| tx * cellWidth
@@ -162,16 +162,35 @@ view { board, speed, paused } =
         toSquare ( col, row, status ) =
             makeSquare col row status
 
-        viewPort =
+        viewBoxParams =
             [ 0
             , 0
             , config.boardWidth
             , config.boardHeight
             ]
+
+        stringifyViewPort =
+            String.join " " << List.map toString
+
+        toolbar =
+            [ text "Speed: "
+            , button [ onClick (SpeedDelta (-config.speedDelta)) ] [ text "-" ]
+            , text <| toString speed
+            , button [ onClick (SpeedDelta config.speedDelta) ] [ text "+" ]
+            , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
+            , if paused then
+                span []
+                    [ button [ onClick Pause ] [ text "Play" ]
+                    , button [ onClick Step ] [ text "Step" ]
+                    ]
+              else
+                button [ onClick Pause ] [ text "Pause" ]
+            ]
     in
         div []
-            [ svg
-                [ viewBox <| String.join " " (List.map toString viewPort)
+            [ div [] toolbar
+            , svg
+                [ viewBox <| stringifyViewPort viewBoxParams
                 , width <| (toString config.boardWidth) ++ "px"
                 , height <| (toString config.boardHeight) ++ "px"
                 ]
@@ -179,24 +198,4 @@ view { board, speed, paused } =
                     toSquare
                     flattenedBoard
                 )
-            , div []
-                [ if paused then
-                    span []
-                        [ button [ onClick Pause ] [ text "Play" ]
-                        , button [ onClick Step ] [ text "Step" ]
-                        ]
-                  else
-                    button [ onClick Pause ] [ text "Pause" ]
-                , button [ onClick (SpeedDelta (-config.speedDelta)) ] [ text "-" ]
-                , text <|
-                    (if paused then
-                        "Paused"
-                     else
-                        toString speed
-                    )
-                , text <| " height " ++ (toString <| config.boardHeight // config.rows)
-                , text <| " width " ++ (toString <| config.boardWidth // config.cols)
-                , button [ onClick (SpeedDelta config.speedDelta) ] [ text "+" ]
-                , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
-                ]
             ]
