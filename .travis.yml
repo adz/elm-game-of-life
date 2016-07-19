@@ -2,9 +2,7 @@ language: haskell
 install:
   - npm install -g elm
   - elm-package install -y
-before_script:
-  - ./bin/build
-script: node build/test.js
+script: ./bin/test
 cache:
   directories:
     - elm-stuff

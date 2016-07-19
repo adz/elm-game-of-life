@@ -1,3 +1,6 @@
 #!/bin/bash
-elm-make --yes --output build/test.js tests/TestRunner.elm
-node build/test
+TEST_BUNDLE=build/test.js
+
+[ -f "$TEST_BUNDLE" ] && rm "$TEST_BUNDLE"
+elm-make --yes --output $TEST_BUNDLE tests/TestRunner.elm \
+  && node $TEST_BUNDLE
