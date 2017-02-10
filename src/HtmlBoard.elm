@@ -2,18 +2,19 @@ module Main exposing (..)
 
 import Html exposing (Html, div, span, h1, text, img, button)
 import Html.Events exposing (onClick)
-import Html.Attributes
 import Html
 import Svg exposing (svg, rect)
 import Svg.Attributes exposing (..)
 import Time exposing (Time, second, millisecond)
 import Board exposing (Board)
-import BoardSpec exposing (fromSpec, trimSpec)
-import Arrangements exposing (stabalisingToRepeating)
 import Random
-import Array
 import Task
 import String
+
+
+-- Try out different pre-defined boards as specifications
+-- import Arrangements exposing (stabalisingToRepeating)
+-- import BoardSpec exposing (fromSpec, trimSpec)
 
 
 config =
@@ -29,6 +30,7 @@ config =
     }
 
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -127,6 +129,7 @@ subscriptions { speed } =
 -- VIEW
 
 
+makeSquare : Int -> Int -> Bool -> Svg.Svg msg
 makeSquare tx ty status =
     let
         cellWidth =

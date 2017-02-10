@@ -1,6 +1,7 @@
 module Arrangements exposing (..)
 
 
+stabalisingToRepeating : String
 stabalisingToRepeating =
     """
     ...........
@@ -17,6 +18,7 @@ stabalisingToRepeating =
     """
 
 
+stabalisingToStatic : String
 stabalisingToStatic =
     """
     ...........

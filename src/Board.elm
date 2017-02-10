@@ -1,7 +1,6 @@
 module Board exposing (..)
 
 import Array
-import String
 import List
 
 
