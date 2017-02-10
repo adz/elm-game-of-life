@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="assets/tacit.min.css">
+    <script src="elm-game-of-life.js"></script>
+  </head>
+  <body>
+    <h1>Game of Life in Elm</h1>
+    <img src="assets/tree.png" style="position: absolute; right: 0; top: 0; opacity: 0.1; pointer-events: none"/>
+    <div id="game-of-life"></div>
+    <script>
+        var node = document.getElementById('game-of-life');
+        var app = Elm.Main.embed(node);
+    </script>
+  </body>
+ </html>
