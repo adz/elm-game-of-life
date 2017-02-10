@@ -11,18 +11,19 @@ import BoardSpec exposing (trimSpec, fromSpec, toSpec)
 specs : { empty2By3 : String, filled2By3 : String }
 specs =
     { empty2By3 =
-        trimSpec """
-                ..
-                ..
-                ..
-                """
+        trimSpec """..
+                    ..
+                    .."""
     , filled2By3 =
-        trimSpec """
-                **
-                **
-                **
-                """
+        trimSpec """**
+                    **
+                    **"""
     }
+
+
+boards : { empty2By3 : Board, filled2By3 : Board }
+boards =
+    { empty2By3 = fromSpec specs.empty2By3, filled2By3 = fromSpec specs.filled2By3 }
 
 
 tests : Test
@@ -39,21 +40,17 @@ testBoardConstruction =
                 Board.makeEmpty 1 1
                     |> Expect.equal (fromSpec ".")
         , test "Making a empty 2x3 board" <|
-            \_ -> Expect.equal (Board.makeEmpty 2 3) (fromSpec specs.empty2By3)
-        , let
-            filledBoard =
-                fromSpec specs.filled2By3
-          in
-            testBoardContents filledBoard
-                [ ( 0, 0 )
-                , ( 1, 0 )
-                , ( 0, 1 )
-                , ( 1, 1 )
-                , ( 0, 2 )
-                , ( 1, 2 )
-                ]
-                -- off board grid considered dead
-                [ ( 9000, 90000 ) ]
+            \_ -> Expect.equal (Board.makeEmpty 2 3) boards.empty2By3
+        , testBoardContents boards.filled2By3
+            [ ( 0, 0 )
+            , ( 1, 0 )
+            , ( 0, 1 )
+            , ( 1, 1 )
+            , ( 0, 2 )
+            , ( 1, 2 )
+            ]
+            -- off board grid considered dead
+            [ ( 9000, 90000 ) ]
         ]
 
 
@@ -88,11 +85,11 @@ testBoardContents board living dead =
 testBoardSeralization : Test
 testBoardSeralization =
     describe "Board serialization"
-        [ test "toSpec from empty" <|
-            \_ -> Expect.equal specs.empty2By3 (toSpec (Board.makeEmpty 2 3))
-        , test "toSpec from filled" <|
-            \_ -> Expect.equal (toSpec <| fromSpec specs.filled2By3) specs.filled2By3
-        , test "flatten" <|
+        [ test "toSpec produces expected string for empty boards" <|
+            \_ -> Expect.equal specs.empty2By3 (toSpec <| Board.makeEmpty 2 3)
+        , test "toSpec produces expected string for filled boards" <|
+            \_ -> Expect.equal specs.filled2By3 (toSpec <| boards.filled2By3)
+        , test "flatten produces a list of positions with living status" <|
             \_ ->
                 Expect.equal (Board.flatten <| Board.makeEmpty 2 3)
                     [ ( 0, 0, False )
@@ -134,7 +131,7 @@ testVivify : Test
 testVivify =
     let
         aliveAt11 =
-            Board.vivify 1 1 (fromSpec specs.empty2By3)
+            Board.vivify 1 1 boards.empty2By3
     in
         testBoardContents
             aliveAt11
