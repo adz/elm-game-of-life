@@ -2,7 +2,7 @@ module BoardTests exposing (tests)
 
 import Test exposing (Test, describe, test)
 import Expect
-import Board
+import Board exposing (Board)
 import BoardSpec exposing (trimSpec, fromSpec, toSpec)
 
 
@@ -44,7 +44,7 @@ testBoardConstruction =
             filledBoard =
                 fromSpec specs.filled2By3
           in
-            testBoard filledBoard
+            testBoardContents filledBoard
                 [ ( 0, 0 )
                 , ( 1, 0 )
                 , ( 0, 1 )
@@ -56,8 +56,8 @@ testBoardConstruction =
         ]
 
 
-testBoard : Board.Board -> List ( Int, Int ) -> List ( Int, Int ) -> Test
-testBoard board living dead =
+testBoardContents : Board -> List ( Int, Int ) -> List ( Int, Int ) -> Test
+testBoardContents board living dead =
     let
         fetchAt x y =
             Board.get x y board
@@ -124,7 +124,7 @@ testKill =
         deadAt11 =
             Board.kill 1 1 (fromSpec specs.filled2By3)
     in
-        testBoard
+        testBoardContents
             deadAt11
             [ ( 0, 0 )
             , ( 1, 0 )
@@ -141,7 +141,7 @@ testVivify =
         aliveAt11 =
             Board.vivify 1 1 (fromSpec specs.empty2By3)
     in
-        testBoard
+        testBoardContents
             aliveAt11
             [ ( 1, 1 ) ]
             [ ( 0, 0 )
