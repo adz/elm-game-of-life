@@ -1,148 +1,189 @@
-module BoardTests exposing (..)
+module BoardTests exposing (tests)
 
-import ElmTest exposing (Test, suite, equals, assertEqual, test)
+import Test exposing (Test, describe, test)
+import Expect
 import Board
 import BoardSpec exposing (trimSpec, fromSpec, toSpec)
-import Array exposing (fromList)
-import Maybe exposing (Maybe(Just, Nothing))
-import List
 
 
 {-| A set of simple board specifications: laid out as text for readability
 -}
-empty2By3 =
-    trimSpec """..
+specs : { empty2By3 : String, filled2By3 : String }
+specs =
+    { empty2By3 =
+        trimSpec """
+                ..
                 ..
                 ..
                 """
-
-
-filled2By3 =
-    trimSpec """**
+    , filled2By3 =
+        trimSpec """
+                **
                 **
                 **
                 """
+    }
 
 
 tests : Test
 tests =
-    suite "Board construction tests"
-        [ testSingleCell
-        , testEmpty
-        , testFilled
-        , testToSpec
-        , testToSpecFilled
-        , testKill
-        , testVivify
-        , testFlatten
-        , testGen
-        , testGenRows
-        , testGenRowsBroked
-          -- , testGenGlider
+    describe "All tests"
+        [ testBoardConstruction ]
+
+
+testBoardConstruction : Test
+testBoardConstruction =
+    describe "Board construction"
+        [ test "Making an empty single cell board" <|
+            \_ ->
+                Board.makeEmpty 1 1
+                    |> Expect.equal (fromSpec ".")
+        , test "Making a empty 2x3 board" <|
+            \_ -> Expect.equal (Board.makeEmpty 2 3) (fromSpec specs.empty2By3)
+        , let
+            filledBoard =
+                fromSpec specs.filled2By3
+          in
+            testBoard filledBoard
+                [ ( 0, 0 )
+                , ( 1, 0 )
+                , ( 0, 1 )
+                , ( 1, 1 )
+                , ( 0, 2 )
+                , ( 1, 2 )
+                ]
+                []
         ]
 
 
-testSingleCell =
-    test "Single cell board"
-        (assertEqual (Board.makeEmpty 1 1) (fromSpec "."))
-
-
-testEmpty =
-    Board.makeEmpty 2 3 `equals` fromSpec empty2By3
-
-
-testFilled =
+testBoard : Board.Board -> List ( Int, Int ) -> List ( Int, Int ) -> Test
+testBoard board living dead =
     let
-        filledBoard =
-            fromSpec filled2By3
+        fetchAt x y =
+            Board.get x y board
+
+        expectAliveAt x y isAlive =
+            \_ -> Expect.equal (fetchAt x y) isAlive
+
+        testAliveAt isAlive ( x, y ) =
+            test
+                ("Expected at x:"
+                    ++ toString x
+                    ++ ",y:"
+                    ++ toString y
+                    ++ " to be "
+                    ++ toString isAlive
+                )
+                (expectAliveAt x y isAlive)
     in
-        suite "Test all filled"
-            [ Board.get 0 0 filledBoard `equals` True
-            , Board.get 1 0 filledBoard `equals` True
-            , Board.get 0 1 filledBoard `equals` True
-            , Board.get 1 1 filledBoard `equals` True
-            , Board.get 0 2 filledBoard `equals` True
-            , Board.get 1 2 filledBoard `equals` True
-            , Board.get 9000 9000 filledBoard `equals` False
-            ]
+        describe "Test all filled" <|
+            (List.map
+                (testAliveAt True)
+                living
+            )
+                ++ (List.map (testAliveAt False) dead)
 
 
+
+-- TODO
+-- , test "Off board returns dead" <|
+--     expectAliveAt 9000 9000 False
+
+
+testBoardSeralization : Test
+testBoardSeralization =
+    describe "Board serialization"
+        [ test "toSpec from empty" <|
+            \_ -> Expect.equal specs.empty2By3 (toSpec (Board.makeEmpty 2 3))
+        , test "toSpec from filled" <|
+            \_ -> Expect.equal (toSpec <| fromSpec specs.filled2By3) specs.filled2By3
+        , test "flatten" <|
+            \_ ->
+                Expect.equal (Board.flatten <| Board.makeEmpty 2 3)
+                    [ ( 0, 0, False )
+                    , ( 1, 0, False )
+                    , ( 0, 1, False )
+                    , ( 1, 1, False )
+                    , ( 0, 2, False )
+                    , ( 1, 2, False )
+                    ]
+        ]
+
+
+testMutations : Test
+testMutations =
+    describe "Killing & vivifying cells" <|
+        [ testKill
+        , testVivify
+        ]
+
+
+testKill : Test
 testKill =
     let
-        filledBoard =
-            Board.kill 1 1 (fromSpec filled2By3)
+        deadAt11 =
+            Board.kill 1 1 (fromSpec specs.filled2By3)
     in
-        suite "Test killed correctly filled"
-            [ Board.get 0 0 filledBoard `equals` True
-            , Board.get 1 0 filledBoard `equals` True
-            , Board.get 0 1 filledBoard `equals` True
-            , Board.get 1 1 filledBoard `equals` False
-            , Board.get 0 2 filledBoard `equals` True
-            , Board.get 1 2 filledBoard `equals` True
+        testBoard
+            deadAt11
+            [ ( 0, 0 )
+            , ( 1, 0 )
+            , ( 0, 1 )
+            , ( 0, 2 )
+            , ( 1, 1 )
             ]
+            [ ( 1, 1 ) ]
 
 
+testVivify : Test
 testVivify =
     let
-        filledBoard =
-            Board.vivify 1 1 (fromSpec empty2By3)
+        aliveAt11 =
+            Board.vivify 1 1 (fromSpec specs.empty2By3)
     in
-        suite "Test killed correctly filled"
-            [ Board.get 0 0 filledBoard `equals` False
-            , Board.get 1 0 filledBoard `equals` False
-            , Board.get 0 1 filledBoard `equals` False
-            , Board.get 1 1 filledBoard `equals` True
-            , Board.get 0 2 filledBoard `equals` False
-            , Board.get 1 2 filledBoard `equals` False
+        testBoard
+            aliveAt11
+            [ ( 1, 1 ) ]
+            [ ( 0, 0 )
+            , ( 1, 0 )
+            , ( 0, 1 )
+            , ( 0, 2 )
+            , ( 1, 1 )
             ]
 
 
-testToSpec =
-    empty2By3 `equals` (toSpec (Board.makeEmpty 2 3))
+testGeneration : Test
+testGeneration =
+    describe "Generating new boards" <|
+        [ test "Simple row of three" <|
+            \_ -> Expect.equal (Board.nextGen <| fromSpec "***") (fromSpec ".*.")
+        , test "An L in a square" <|
+            \_ -> Expect.equal (toSpec <| (Board.nextGen <| fromSpec ".*\n**")) (toSpec <| (fromSpec "**\n**"))
+        , test "Simple column of two" <|
+            \_ -> Expect.equal (toSpec <| (Board.nextGen <| fromSpec "*\n.")) (toSpec <| (fromSpec ".\n."))
+        , testGenGlider
+        ]
 
 
-testFlatten =
-    (Board.flatten <| Board.makeEmpty 2 3)
-        `equals`
-            [ ( 0, 0, False )
-            , ( 1, 0, False )
-            , ( 0, 1, False )
-            , ( 1, 1, False )
-            , ( 0, 2, False )
-            , ( 1, 2, False )
-            ]
-
-
-testToSpecFilled =
-    (toSpec <| fromSpec filled2By3) `equals` filled2By3
-
-
-testGen =
-    (Board.nextGen <| fromSpec "***") `equals` (fromSpec ".*.")
-
-
-testGenRows =
-    (toSpec <| (Board.nextGen <| fromSpec ".*\n**")) `equals` (toSpec <| (fromSpec "**\n**"))
-
-
-testGenRowsBroked =
-    (toSpec <| (Board.nextGen <| fromSpec "*\n.")) `equals` (toSpec <| (fromSpec ".\n."))
-
-
+testGenGlider : Test
 testGenGlider =
     let
+        spec =
+            fromSpec << trimSpec
+
         glider =
-            fromSpec <| trimSpec """
+            spec """
        .*...
        ..*..
        ***..
        ....."""
 
         gliderNext =
-            fromSpec <| trimSpec """
+            spec """
        .....
        .**..
        .**..
        .*..."""
     in
-        (toSpec <| Board.nextGen glider) `equals` (toSpec gliderNext)
+        test "Generate a glider" <|
+            \_ -> Expect.equal (toSpec <| Board.nextGen glider) (toSpec gliderNext)
