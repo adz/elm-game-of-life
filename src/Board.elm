@@ -95,13 +95,13 @@ nextGen board =
                 newBoard
 
         foldRow rowIndex row newBoard =
-            snd <|
+            Tuple.second <|
                 Array.foldl
                     (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell colIndex rowIndex newBoard2 ))
                     ( 0, newBoard )
                     row
     in
-        snd <|
+        Tuple.second <|
             Array.foldl
                 (\row ( rowIndex, newBoard ) -> ( rowIndex + 1, foldRow rowIndex row newBoard ))
                 ( 0, board )
@@ -120,7 +120,7 @@ get colNum rowNum board =
             Array.get colNum
 
         getCell =
-            getRow board `Maybe.andThen` getCol
+            getRow board |> Maybe.andThen getCol
     in
         Maybe.withDefault False getCell
 

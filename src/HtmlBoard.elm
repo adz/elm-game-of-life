@@ -3,7 +3,7 @@ module Main exposing (..)
 import Html exposing (Html, div, span, h1, text, img, button)
 import Html.Events exposing (onClick)
 import Html.Attributes
-import Html.App as App
+import Html
 import Svg exposing (svg, rect)
 import Svg.Attributes exposing (..)
 import Time exposing (Time, second, millisecond)
@@ -30,7 +30,7 @@ config =
 
 
 main =
-    App.program
+    Html.program
         { init = init
         , view = view
         , update = update
@@ -53,7 +53,7 @@ type alias Model =
 -}
 message : msg -> Cmd msg
 message x =
-    Task.perform identity identity (Task.succeed x)
+    Task.perform identity (Task.succeed x)
 
 
 
