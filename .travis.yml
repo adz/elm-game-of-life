@@ -1,8 +1,8 @@
 language: haskell
 install:
-  - npm install -g elm
+  - npm install -g elm elm-test
   - elm-package install -y
-script: ./bin/test
+script: elm-test
 cache:
   directories:
     - elm-stuff
