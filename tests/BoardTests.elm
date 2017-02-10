@@ -52,7 +52,8 @@ testBoardConstruction =
                 , ( 0, 2 )
                 , ( 1, 2 )
                 ]
-                []
+                -- off board grid considered dead
+                [ ( 9000, 90000 ) ]
         ]
 
 
@@ -82,12 +83,6 @@ testBoardContents board living dead =
                 living
             )
                 ++ (List.map (testAliveAt False) dead)
-
-
-
--- TODO
--- , test "Off board returns dead" <|
---     expectAliveAt 9000 9000 False
 
 
 testBoardSeralization : Test
