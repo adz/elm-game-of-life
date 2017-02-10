@@ -29,7 +29,11 @@ boards =
 tests : Test
 tests =
     describe "All tests"
-        [ testBoardConstruction ]
+        [ testBoardConstruction
+        , testBoardSeralization
+        , testMutations
+        , testGeneration
+        ]
 
 
 testBoardConstruction : Test
@@ -122,7 +126,7 @@ testKill =
             , ( 1, 0 )
             , ( 0, 1 )
             , ( 0, 2 )
-            , ( 1, 1 )
+            , ( 1, 2 )
             ]
             [ ( 1, 1 ) ]
 
@@ -140,7 +144,7 @@ testVivify =
             , ( 1, 0 )
             , ( 0, 1 )
             , ( 0, 2 )
-            , ( 1, 1 )
+            , ( 1, 2 )
             ]
 
 
@@ -164,18 +168,16 @@ testGenGlider =
             fromSpec << trimSpec
 
         glider =
-            spec """
-       .*...
-       ..*..
-       ***..
-       ....."""
+            spec """.*...
+                    ..*..
+                    ***..
+                    ....."""
 
         gliderNext =
-            spec """
-       .....
-       .**..
-       .**..
-       .*..."""
+            spec """.....
+                    *.*..
+                    .**..
+                    .*..."""
     in
         test "Generate a glider" <|
             \_ -> Expect.equal (toSpec <| Board.nextGen glider) (toSpec gliderNext)
