@@ -118,7 +118,7 @@ testKill : Test
 testKill =
     let
         deadAt11 =
-            Board.kill 1 1 (fromSpec specs.filled2By3)
+            Board.kill (1, 1) (fromSpec specs.filled2By3)
     in
         testBoardContents
             deadAt11
@@ -135,7 +135,7 @@ testVivify : Test
 testVivify =
     let
         aliveAt11 =
-            Board.vivify 1 1 boards.empty2By3
+            Board.vivify (1, 1) boards.empty2By3
     in
         testBoardContents
             aliveAt11

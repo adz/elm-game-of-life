@@ -22,6 +22,8 @@ import List
 type alias Board =
     Array.Array (Array.Array Bool)
 
+type alias Pos = (Int, Int)
+
 
 {-| Convert array of arrays to list of lists
 -}
@@ -51,9 +53,10 @@ flatten board =
 
 {-| Calculate number of neighbours alive
 -}
-neighbours : Int -> Int -> Board -> Int
-neighbours col row board =
+neighbours : Pos -> Board -> Int
+neighbours pos board =
     let
+        (col, row) = pos
         neighbourCells =
             [ get (col - 1) row board
             , get (col - 1) (row - 1) board
@@ -79,24 +82,24 @@ neighbours col row board =
 nextGen : Board -> Board
 nextGen board =
     let
-        shouldKill colIndex rowIndex =
-            not <| List.member (neighbours colIndex rowIndex board) [ 2, 3 ]
+        shouldKill pos =
+            not <| List.member (neighbours pos board) [ 2, 3 ]
 
-        shouldReproduce colIndex rowIndex =
-            (neighbours colIndex rowIndex board) == 3
+        shouldReproduce pos =
+            (neighbours pos board) == 3
 
-        visitCell cell colIndex rowIndex newBoard =
-            if cell && shouldKill colIndex rowIndex then
-                kill colIndex rowIndex newBoard
-            else if not cell && shouldReproduce colIndex rowIndex then
-                vivify colIndex rowIndex newBoard
+        visitCell cell pos newBoard =
+            if cell && shouldKill pos then
+                kill pos newBoard
+            else if not cell && shouldReproduce pos then
+                vivify pos newBoard
             else
                 newBoard
 
         foldRow rowIndex row newBoard =
             Tuple.second <|
                 Array.foldl
-                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell colIndex rowIndex newBoard2 ))
+                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell (colIndex, rowIndex) newBoard2 ))
                     ( 0, newBoard )
                     row
     in
@@ -126,9 +129,10 @@ get colNum rowNum board =
 
 {-| Put a cell at position colNum / rowNum
 -}
-put : Int -> Int -> Board -> Bool -> Board
-put colNum rowNum board status =
+put : Pos -> Board -> Bool -> Board
+put pos board status =
     let
+        (colNum, rowNum) = pos
         newRow row =
             Array.set colNum status row
 
@@ -143,16 +147,16 @@ put colNum rowNum board status =
 
 {-| Kill cell at position col, row
 -}
-kill : Int -> Int -> Board -> Board
-kill colNum rowNum board =
-    put colNum rowNum board False
+kill : Pos -> Board -> Board
+kill pos board =
+    put pos board False
 
 
 {-| Vivify (bring to life) cell at position col, row
 -}
-vivify : Int -> Int -> Board -> Board
-vivify colNum rowNum board =
-    put colNum rowNum board True
+vivify : Pos -> Board -> Board
+vivify pos board =
+    put pos board True
 
 
 {-| Make a new board of size cols/rows
