@@ -53,18 +53,16 @@ flatten board =
         List.concatMap identity boardTuplified
 
 
+{-| Take a list and generate all possible permutaions of pairs of members
+-}
 pairPermutations : List a -> List ( a, a )
 pairPermutations xs =
     let
-        pairPermutations2 xs ys =
-            case ( xs, ys ) of
-                ( head :: xs_left, ys ) ->
-                    (List.map ((,) head) ys) ++ pairPermutations2 xs_left ys
-
-                ( xs, ys ) ->
-                    []
+        pairUp x ys =
+            List.map (\y -> ( x, y )) ys
     in
-        pairPermutations2 xs xs
+        List.map (\x -> pairUp x xs) xs
+            |> List.concat
 
 
 {-| Calculate number of neighbours alive
