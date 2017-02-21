@@ -4197,50 +4197,23 @@ var _adz$elm_game_of_life$Board$makeEmpty = F2(
 			rows,
 			A2(_elm_lang$core$Array$repeat, cols, false));
 	});
-var _adz$elm_game_of_life$Board$put = F3(
-	function (pos, board, status) {
-		var _p0 = pos;
-		var colNum = _p0._0;
-		var rowNum = _p0._1;
-		var newRow = function (row) {
-			return A3(_elm_lang$core$Array$set, colNum, status, row);
-		};
-		var makeNewRow = A2(
-			_elm_lang$core$Maybe$map,
-			newRow,
-			A2(_elm_lang$core$Array$get, rowNum, board));
-		var maybeMakeNewRow = A2(
-			_elm_lang$core$Maybe$withDefault,
-			_elm_lang$core$Array$fromList(
-				{ctor: '[]'}),
-			makeNewRow);
-		return A3(_elm_lang$core$Array$set, rowNum, maybeMakeNewRow, board);
-	});
-var _adz$elm_game_of_life$Board$kill = F2(
-	function (pos, board) {
-		return A3(_adz$elm_game_of_life$Board$put, pos, board, false);
-	});
-var _adz$elm_game_of_life$Board$vivify = F2(
-	function (pos, board) {
-		return A3(_adz$elm_game_of_life$Board$put, pos, board, true);
-	});
 var _adz$elm_game_of_life$Board$get = F2(
-	function (_p1, board) {
-		var _p2 = _p1;
+	function (_p0, board) {
+		var _p1 = _p0;
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
 			false,
 			A2(
 				_elm_lang$core$Maybe$andThen,
-				_elm_lang$core$Array$get(_p2._0),
-				A2(_elm_lang$core$Array$get, _p2._1, board)));
+				_elm_lang$core$Array$get(_p1._0),
+				A2(_elm_lang$core$Array$get, _p1._1, board)));
 	});
 var _adz$elm_game_of_life$Board$pairPermutations = function (xs) {
 	var pairPermutations2 = F2(
 		function (xs, ys) {
-			var _p3 = {ctor: '_Tuple2', _0: xs, _1: ys};
-			if (_p3._0.ctor === '::') {
-				var _p4 = _p3._1;
+			var _p2 = {ctor: '_Tuple2', _0: xs, _1: ys};
+			if (_p2._0.ctor === '::') {
+				var _p3 = _p2._1;
 				return A2(
 					_elm_lang$core$Basics_ops['++'],
 					A2(
@@ -4248,9 +4221,9 @@ var _adz$elm_game_of_life$Board$pairPermutations = function (xs) {
 						F2(
 							function (v0, v1) {
 								return {ctor: '_Tuple2', _0: v0, _1: v1};
-							})(_p3._0._0),
-						_p4),
-					A2(pairPermutations2, _p3._0._1, _p4));
+							})(_p2._0._0),
+						_p3),
+					A2(pairPermutations2, _p2._0._1, _p3));
 			} else {
 				return {ctor: '[]'};
 			}
@@ -4262,23 +4235,22 @@ var _adz$elm_game_of_life$Board$neighbours = F2(
 		var valueOf = function (cell) {
 			return cell ? 1 : 0;
 		};
-		var _p5 = pos;
-		var col = _p5._0;
-		var row = _p5._1;
-		var offsetAt = function (_p6) {
-			var _p7 = _p6;
-			return {ctor: '_Tuple2', _0: col + _p7._0, _1: row + _p7._1};
+		var _p4 = pos;
+		var col = _p4._0;
+		var row = _p4._1;
+		var offsetAt = function (_p5) {
+			var _p6 = _p5;
+			return {ctor: '_Tuple2', _0: col + _p6._0, _1: row + _p6._1};
 		};
 		var neighbourPositions = A2(
-			_elm_lang$core$List$map,
-			offsetAt,
+			_elm_lang$core$List$filter,
+			F2(
+				function (x, y) {
+					return !_elm_lang$core$Native_Utils.eq(x, y);
+				})(pos),
 			A2(
-				_elm_lang$core$List$filter,
-				F2(
-					function (x, y) {
-						return !_elm_lang$core$Native_Utils.eq(x, y);
-					})(
-					{ctor: '_Tuple2', _0: 0, _1: 0}),
+				_elm_lang$core$List$map,
+				offsetAt,
 				_adz$elm_game_of_life$Board$pairPermutations(
 					{
 						ctor: '::',
@@ -4308,8 +4280,8 @@ var _adz$elm_game_of_life$Board$nextGen = function (board) {
 			A2(_adz$elm_game_of_life$Board$neighbours, pos, board),
 			3);
 	};
-	var shouldKill = function (pos) {
-		return !A2(
+	var shouldLiveOn = function (pos) {
+		return A2(
 			_elm_lang$core$List$member,
 			A2(_adz$elm_game_of_life$Board$neighbours, pos, board),
 			{
@@ -4322,57 +4294,43 @@ var _adz$elm_game_of_life$Board$nextGen = function (board) {
 				}
 			});
 	};
-	var visitCell = F3(
-		function (cell, pos, newBoard) {
-			return (cell && shouldKill(pos)) ? A2(_adz$elm_game_of_life$Board$kill, pos, newBoard) : (((!cell) && shouldReproduce(pos)) ? A2(_adz$elm_game_of_life$Board$vivify, pos, newBoard) : newBoard);
+	var visitCell = F2(
+		function (isAlive, pos) {
+			return isAlive ? shouldLiveOn(pos) : shouldReproduce(pos);
 		});
-	var foldRow = F3(
-		function (rowIndex, row, newBoard) {
-			return _elm_lang$core$Tuple$second(
-				A3(
-					_elm_lang$core$Array$foldl,
-					F2(
-						function (cell, _p8) {
-							var _p9 = _p8;
-							var _p10 = _p9._0;
-							return {
-								ctor: '_Tuple2',
-								_0: _p10 + 1,
-								_1: A3(
-									visitCell,
-									cell,
-									{ctor: '_Tuple2', _0: _p10, _1: rowIndex},
-									_p9._1)
-							};
-						}),
-					{ctor: '_Tuple2', _0: 0, _1: newBoard},
-					row));
+	var mapRow = F2(
+		function (rowIndex, row) {
+			return A2(
+				_elm_lang$core$Array$indexedMap,
+				F2(
+					function (colIndex, cell) {
+						return A2(
+							visitCell,
+							cell,
+							{ctor: '_Tuple2', _0: colIndex, _1: rowIndex});
+					}),
+				row);
 		});
-	return _elm_lang$core$Tuple$second(
-		A3(
-			_elm_lang$core$Array$foldl,
+	var mapBoard = function (board) {
+		return A2(
+			_elm_lang$core$Array$indexedMap,
 			F2(
-				function (row, _p11) {
-					var _p12 = _p11;
-					var _p13 = _p12._0;
-					return {
-						ctor: '_Tuple2',
-						_0: _p13 + 1,
-						_1: A3(foldRow, _p13, row, _p12._1)
-					};
+				function (rowIndex, row) {
+					return A2(mapRow, rowIndex, row);
 				}),
-			{ctor: '_Tuple2', _0: 0, _1: board},
-			board));
+			board);
+	};
+	return mapBoard(board);
 };
-var _adz$elm_game_of_life$Board$fromList = function (_p14) {
+var _adz$elm_game_of_life$Board$fromList = function (_p7) {
 	return _elm_lang$core$Array$fromList(
-		A2(_elm_lang$core$List$map, _elm_lang$core$Array$fromList, _p14));
+		A2(_elm_lang$core$List$map, _elm_lang$core$Array$fromList, _p7));
 };
-var _adz$elm_game_of_life$Board$asList = function (_p15) {
+var _adz$elm_game_of_life$Board$asList = function (_p8) {
 	return A2(
 		_elm_lang$core$List$map,
 		_elm_lang$core$Array$toList,
-		_elm_lang$core$Array$toList(_p15));
+		_elm_lang$core$Array$toList(_p8));
 };
 var _adz$elm_game_of_life$Board$flatten = function (board) {
 	var rowToTuple = F2(
