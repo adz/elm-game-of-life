@@ -100,32 +100,25 @@ neighbours pos board =
 nextGen : Board -> Board
 nextGen board =
     let
-        shouldKill pos =
-            not <| List.member (neighbours pos board) [ 2, 3 ]
+        shouldLiveOn pos =
+            List.member (neighbours pos board) [ 2, 3 ]
 
         shouldReproduce pos =
             (neighbours pos board) == 3
 
-        visitCell cell pos newBoard =
-            if cell && shouldKill pos then
-                kill pos newBoard
-            else if not cell && shouldReproduce pos then
-                vivify pos newBoard
+        visitCell isAlive pos =
+            if isAlive then
+                shouldLiveOn pos
             else
-                newBoard
+                shouldReproduce pos
 
-        foldRow rowIndex row newBoard =
-            Tuple.second <|
-                Array.foldl
-                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell ( colIndex, rowIndex ) newBoard2 ))
-                    ( 0, newBoard )
-                    row
+        mapRow rowIndex row =
+            Array.indexedMap (\colIndex cell -> visitCell cell ( colIndex, rowIndex )) row
+
+        mapBoard board =
+            Array.indexedMap (\rowIndex row -> mapRow rowIndex row) board
     in
-        Tuple.second <|
-            Array.foldl
-                (\row ( rowIndex, newBoard ) -> ( rowIndex + 1, foldRow rowIndex row newBoard ))
-                ( 0, board )
-                board
+        mapBoard board
 
 
 {-| Get a cell at position colNum / rowNum
@@ -135,40 +128,6 @@ get ( colNum, rowNum ) board =
     Array.get rowNum board
         |> Maybe.andThen (Array.get colNum)
         |> Maybe.withDefault False
-
-
-{-| Put a cell at position colNum / rowNum
--}
-put : Pos -> Board -> Bool -> Board
-put pos board status =
-    let
-        ( colNum, rowNum ) =
-            pos
-
-        newRow row =
-            Array.set colNum status row
-
-        makeNewRow =
-            Maybe.map newRow (Array.get rowNum board)
-
-        maybeMakeNewRow =
-            (Maybe.withDefault (Array.fromList []) makeNewRow)
-    in
-        Array.set rowNum maybeMakeNewRow board
-
-
-{-| Kill cell at position col, row
--}
-kill : Pos -> Board -> Board
-kill pos board =
-    put pos board False
-
-
-{-| Vivify (bring to life) cell at position col, row
--}
-vivify : Pos -> Board -> Board
-vivify pos board =
-    put pos board True
 
 
 {-| Make a new board of size cols/rows

@@ -31,7 +31,6 @@ tests =
     describe "All tests"
         [ testBoardConstruction
         , testBoardSeralization
-        , testMutations
         , testGeneration
         ]
 
@@ -104,48 +103,6 @@ testBoardSeralization =
                     , ( 1, 2, False )
                     ]
         ]
-
-
-testMutations : Test
-testMutations =
-    describe "Killing & vivifying cells" <|
-        [ testKill
-        , testVivify
-        ]
-
-
-testKill : Test
-testKill =
-    let
-        deadAt11 =
-            Board.kill ( 1, 1 ) (fromSpec specs.filled2By3)
-    in
-        testBoardContents
-            deadAt11
-            [ ( 0, 0 )
-            , ( 1, 0 )
-            , ( 0, 1 )
-            , ( 0, 2 )
-            , ( 1, 2 )
-            ]
-            [ ( 1, 1 ) ]
-
-
-testVivify : Test
-testVivify =
-    let
-        aliveAt11 =
-            Board.vivify ( 1, 1 ) boards.empty2By3
-    in
-        testBoardContents
-            aliveAt11
-            [ ( 1, 1 ) ]
-            [ ( 0, 0 )
-            , ( 1, 0 )
-            , ( 0, 1 )
-            , ( 0, 2 )
-            , ( 1, 2 )
-            ]
 
 
 testGeneration : Test
