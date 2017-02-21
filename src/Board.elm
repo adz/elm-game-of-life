@@ -80,8 +80,8 @@ neighbours pos board =
 
         neighbourPositions =
             pairPermutations [ -1, 0, 1 ]
-                |> List.filter ((/=) ( 0, 0 ))
                 |> List.map offsetAt
+                |> List.filter ((/=) pos)
 
         neighbourCells =
             List.map (\position -> get position board) neighbourPositions
