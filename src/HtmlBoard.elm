@@ -48,6 +48,7 @@ type alias Model =
     { board : Board
     , speed : Int
     , paused : Bool
+    , generations : Int
     }
 
 
@@ -67,6 +68,7 @@ init =
     ( { board = Board.makeEmpty config.cols config.rows
       , speed = config.defaultSpeed
       , paused = False
+      , generations = 0
       }
     , message GenerateRandomBoard
     )
@@ -107,7 +109,12 @@ update msg model =
                     ( model, cmd )
 
             Step ->
-                ( { model | board = Board.nextGen model.board }, Cmd.none )
+                ( { model
+                    | board = Board.nextGen model.board
+                    , generations = model.generations + 1
+                  }
+                , Cmd.none
+                )
 
             GenerateRandomBoard ->
                 ( model, Random.generate NewBoard randomBoardGenerator )
@@ -157,7 +164,7 @@ makeSquare tx ty status =
 
 
 view : Model -> Html Msg
-view { board, speed, paused } =
+view { board, speed, paused, generations } =
     let
         flattenedBoard =
             Board.flatten board
@@ -188,6 +195,8 @@ view { board, speed, paused } =
                     ]
               else
                 button [ onClick Pause ] [ text "Pause" ]
+            , text "Generations: "
+            , toString generations |> text
             ]
     in
         div []

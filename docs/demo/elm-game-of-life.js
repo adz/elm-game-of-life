@@ -9246,9 +9246,9 @@ var _adz$elm_game_of_life$Main$makeSquare = F3(
 			},
 			{ctor: '[]'});
 	});
-var _adz$elm_game_of_life$Main$Model = F3(
-	function (a, b, c) {
-		return {board: a, speed: b, paused: c};
+var _adz$elm_game_of_life$Main$Model = F4(
+	function (a, b, c, d) {
+		return {board: a, speed: b, paused: c, generations: d};
 	});
 var _adz$elm_game_of_life$Main$NewBoard = function (a) {
 	return {ctor: 'NewBoard', _0: a};
@@ -9262,7 +9262,8 @@ var _adz$elm_game_of_life$Main$init = {
 	_0: {
 		board: A2(_adz$elm_game_of_life$Board$makeEmpty, _adz$elm_game_of_life$Main$config.cols, _adz$elm_game_of_life$Main$config.rows),
 		speed: _adz$elm_game_of_life$Main$config.defaultSpeed,
-		paused: false
+		paused: false,
+		generations: 0
 	},
 	_1: _adz$elm_game_of_life$Main$message(_adz$elm_game_of_life$Main$GenerateRandomBoard)
 };
@@ -9303,7 +9304,8 @@ var _adz$elm_game_of_life$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							board: _adz$elm_game_of_life$Board$nextGen(model.board)
+							board: _adz$elm_game_of_life$Board$nextGen(model.board),
+							generations: model.generations + 1
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9424,7 +9426,16 @@ var _adz$elm_game_of_life$Main$view = function (_p1) {
 									_0: _elm_lang$html$Html$text('Pause'),
 									_1: {ctor: '[]'}
 								}),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Generations: '),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(
+										_elm_lang$core$Basics$toString(_p2.generations)),
+									_1: {ctor: '[]'}
+								}
+							}
 						}
 					}
 				}
