@@ -62,7 +62,7 @@ testBoardContents : Board -> List ( Int, Int ) -> List ( Int, Int ) -> Test
 testBoardContents board living dead =
     let
         fetchAt x y =
-            Board.get x y board
+            Board.get ( x, y ) board
 
         expectAliveAt x y isAlive =
             \_ -> Expect.equal (fetchAt x y) isAlive
@@ -158,6 +158,10 @@ testGeneration =
         , test "Simple column of two" <|
             \_ -> Expect.equal (toSpec <| (Board.nextGen <| fromSpec "*\n.")) (toSpec <| (fromSpec ".\n."))
         , testGenGlider
+        , test "Permutations" <|
+            \_ ->
+                Board.pairPermutations [ 0, 1 ]
+                    |> Expect.equal [ ( 0, 0 ), ( 0, 1 ), ( 1, 0 ), ( 1, 1 ) ]
         ]
 
 

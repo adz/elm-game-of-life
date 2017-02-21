@@ -53,22 +53,38 @@ flatten board =
         List.concatMap identity boardTuplified
 
 
+pairPermutations : List a -> List ( a, a )
+pairPermutations xs =
+    let
+        pairPermutations2 xs ys =
+            case ( xs, ys ) of
+                ( head :: xs_left, ys ) ->
+                    (List.map ((,) head) ys) ++ pairPermutations2 xs_left ys
+
+                ( xs, ys ) ->
+                    []
+    in
+        pairPermutations2 xs xs
+
+
 {-| Calculate number of neighbours alive
 -}
 neighbours : Pos -> Board -> Int
 neighbours pos board =
     let
-        (col, row) = pos
+        ( col, row ) =
+            pos
+
+        offsetAt ( x, y ) =
+            ( col + x, row + y )
+
+        neighbourPositions =
+            pairPermutations [ -1, 0, 1 ]
+                |> List.filter ((/=) ( 0, 0 ))
+                |> List.map offsetAt
+
         neighbourCells =
-            [ get (col - 1) row board
-            , get (col - 1) (row - 1) board
-            , get col (row - 1) board
-            , get (col + 1) (row - 1) board
-            , get (col + 1) row board
-            , get (col + 1) (row + 1) board
-            , get col (row + 1) board
-            , get (col - 1) (row + 1) board
-            ]
+            List.map (\position -> get position board) neighbourPositions
 
         valueOf cell =
             if cell then
@@ -76,7 +92,7 @@ neighbours pos board =
             else
                 0
     in
-        List.sum <| List.map valueOf neighbourCells
+        List.map valueOf neighbourCells |> List.sum
 
 
 {-| Produce a next generation board
@@ -114,19 +130,11 @@ nextGen board =
 
 {-| Get a cell at position colNum / rowNum
 -}
-get : Int -> Int -> Board -> Bool
-get colNum rowNum board =
-    let
-        getRow =
-            Array.get rowNum
-
-        getCol =
-            Array.get colNum
-
-        getCell =
-            getRow board |> Maybe.andThen getCol
-    in
-        Maybe.withDefault False getCell
+get : Pos -> Board -> Bool
+get ( colNum, rowNum ) board =
+    Array.get rowNum board
+        |> Maybe.andThen (Array.get colNum)
+        |> Maybe.withDefault False
 
 
 {-| Put a cell at position colNum / rowNum
