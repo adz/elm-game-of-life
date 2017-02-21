@@ -85,14 +85,9 @@ neighbours pos board =
 
         neighbourCells =
             List.map (\position -> get position board) neighbourPositions
-
-        valueOf cell =
-            if cell then
-                1
-            else
-                0
     in
-        List.map valueOf neighbourCells |> List.sum
+        List.filter identity neighbourCells
+            |> List.length
 
 
 {-| Produce a next generation board
