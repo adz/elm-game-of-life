@@ -31,12 +31,12 @@ type alias Pos =
 -}
 asList : Board -> List (List Bool)
 asList =
-    List.map Array.toList << Array.toList
+    Array.toList >> List.map Array.toList
 
 
 fromList : List (List Bool) -> Board
 fromList =
-    (List.map Array.fromList) >> Array.fromList
+    List.map Array.fromList >> Array.fromList
 
 
 {-| Flatten board to list of tuples containing col, row and cell

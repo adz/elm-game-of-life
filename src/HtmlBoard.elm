@@ -145,12 +145,12 @@ makeSquare tx ty status =
                 config.deadColour
     in
         rect
-            [ x <| toString <| tx * cellWidth
-            , y <| toString <| ty * cellHeight
-            , width <| toString cellWidth
-            , height <| toString cellHeight
-            , rx <| toString config.cellRounding
-            , ry <| toString config.cellRounding
+            [ tx * cellWidth |> toString |> x
+            , ty * cellHeight |> toString |> y
+            , toString cellWidth |> width
+            , toString cellHeight |> height
+            , toString config.cellRounding |> rx
+            , toString config.cellRounding |> ry
             , fill colour
             ]
             []
@@ -173,12 +173,12 @@ view { board, speed, paused } =
             ]
 
         stringifyViewPort =
-            String.join " " << List.map toString
+            List.map toString >> String.join " "
 
         toolbar =
             [ text "Speed: "
             , button [ onClick (SpeedDelta (-config.speedDelta)) ] [ text "-" ]
-            , text <| toString speed
+            , toString speed |> text
             , button [ onClick (SpeedDelta config.speedDelta) ] [ text "+" ]
             , button [ onClick GenerateRandomBoard ] [ text "Randomize" ]
             , if paused then
@@ -193,9 +193,9 @@ view { board, speed, paused } =
         div []
             [ div [] toolbar
             , svg
-                [ viewBox <| stringifyViewPort viewBoxParams
-                , width <| (toString config.boardWidth) ++ "px"
-                , height <| (toString config.boardHeight) ++ "px"
+                [ stringifyViewPort viewBoxParams |> viewBox
+                , (toString config.boardWidth) ++ "px" |> width
+                , (toString config.boardHeight) ++ "px" |> height
                 ]
                 (List.map
                     toSquare

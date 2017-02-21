@@ -15,7 +15,7 @@ trimSpec =
         trimLines =
             List.map String.trim
     in
-        String.join "\n" << onlyLinesWithContent << trimLines << String.lines
+        String.lines >> trimLines >> onlyLinesWithContent >> String.join "\n"
 
 
 fromSpec : String -> Board
@@ -27,11 +27,11 @@ fromSpec =
         charToCell =
             (==) '*'
     in
-        Array.fromList << List.map rowStringToRow << String.lines
+        String.lines >> List.map rowStringToRow >> Array.fromList
 
 
 toSpec : Board -> String
-toSpec board =
+toSpec =
     let
         rowArrayToString =
             Array.toList >> List.map cellToChar >> String.join ""
@@ -42,4 +42,4 @@ toSpec board =
             else
                 "."
     in
-        String.join "\n" <| List.map rowArrayToString <| Array.toList board
+        Array.toList >> List.map rowArrayToString >> String.join "\n"
