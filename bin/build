@@ -5,4 +5,4 @@ cp -r assets dist/
 mv dist/assets/index.html dist/
 elm-make --yes --output dist/elm-game-of-life.js src/HtmlBoard.elm
 mkdir docs
-cp -R dist docs/demo
+cp -R dist/ docs/demo
