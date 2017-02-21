@@ -22,7 +22,9 @@ import List
 type alias Board =
     Array.Array (Array.Array Bool)
 
-type alias Pos = (Int, Int)
+
+type alias Pos =
+    ( Int, Int )
 
 
 {-| Convert array of arrays to list of lists
@@ -99,7 +101,7 @@ nextGen board =
         foldRow rowIndex row newBoard =
             Tuple.second <|
                 Array.foldl
-                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell (colIndex, rowIndex) newBoard2 ))
+                    (\cell ( colIndex, newBoard2 ) -> ( colIndex + 1, visitCell cell ( colIndex, rowIndex ) newBoard2 ))
                     ( 0, newBoard )
                     row
     in
@@ -132,7 +134,9 @@ get colNum rowNum board =
 put : Pos -> Board -> Bool -> Board
 put pos board status =
     let
-        (colNum, rowNum) = pos
+        ( colNum, rowNum ) =
+            pos
+
         newRow row =
             Array.set colNum status row
 
